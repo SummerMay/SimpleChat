@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Base Client</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <h1> WebSocket base client test</h1><hr>
+    <button id="connect" class="btn btn-lg btn-primary" onclick="connect()">Connect</button>
+    <button id="disconnect" class="btn btn-lg btn-danger" onclick="disconnect()">Disconnect</button>
+    <hr>
+    <h4>Conversation list</h4>
+    <div id="conversationDiv">
+
+    </div>
+    <h4>Response list</h4>
+    <div id="response">
+
+    </div>
+    <form class="form">
+        <div class="input-group">
+            <input id="messageInput" type="text" class="form-control input-lg" placeholder="Put your messsage here">
+                  <span class="input-group-btn">
+                    <button class="btn btn-lg btn-success" type="button" onclick="sendMessage()">Send</button>
+                  </span>
+        </div>
+    </form>
+</div>
+</body>
+
+<script type="text/javascript">
+    var socket_id =  guid();
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+        }
+        return s4() + "-" + s4() + "-" + new Date().getTime();
+    }
+    function setConnected(isConnected) {
+        document.getElementById('connect').disabled = isConnected;
+        document.getElementById('disconnect').disabled = !isConnected;
+        document.getElementById('conversationDiv').style.visibility = isConnected ? 'visible' : 'hidden';
+        document.getElementById('response').innerHTML = '';
+    }
+
+    function connect() {
+        if ('WebSocket' in window){
+            console.log('Websocket supported');
+            socket = new WebSocket('ws://IP:8080//websocket');
+
+            console.log('Connection attempted');
+
+            socket.onopen = function(){
+                console.log('Connection open!');
+                setConnected(true);
+            };
+
+            socket.onclose = function(){
+                console.log('Disconnecting connection');
+            };
+
+            socket.onmessage = function (evt)
+            {
+                var received_msg = evt.data;
+                console.log(received_msg);
+                console.log('message received!');
+                showMessage(received_msg);
+            }
+
+        } else {
+            alert('Websocket not supported');
+        }
+    }
+
+    function disconnect() {
+        setConnected(false);
+        console.log("Disconnected");
+    }
+
+    function sendMessage() {
+        var messageInput = document.getElementById('messageInput');
+        socket.send(JSON.stringify({ 'username': socket_id, 'message': messageInput.value }));
+        messageInput.value = "";
+    }
+
+    function showMessage(message) {
+        var response = document.getElementById('response');
+        var p = document.createElement('p');
+        p.style.wordWrap = 'break-word';
+        p.appendChild(document.createTextNode(message));
+        response.appendChild(p);
+    }
+
+</script>
+
+</html>

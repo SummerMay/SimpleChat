@@ -1,0 +1,7 @@
+/.gradle
+*.log
+*.idea
+*.iml
+settings.gradle
+gradle/*
+gradlew*
